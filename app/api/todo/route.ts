@@ -5,24 +5,25 @@ import {Todo,newTodo,db,todoTable} from '@/app/lib/drizzle'
 import { sql } from '@vercel/postgres'
 
 export async function GET(request: NextRequest){
-
+    // const client = await db.connect()
     try {
-        await sql'CREATE TABLE IF NOT EXISTS Todos(id serial, Task varchar(255))';
+        await sql `CREATE TABLE IF NOT EXISTS Todos(id serial, Task varchar(255))`;
         const res = await db.select().from(todoTable)
         console.log(res);
         return NextResponse.json({ data: res})
     } catch (error) {
-        console.log(error);
+        console.log((error as {message: string}).message);
         return NextResponse.json({message: "Something went wrong"})
     }
 }
 
 export async function POST(request:NextRequest) {
     const req = await request.json()
-    const client = await db.connect()
     try {
         if(req.task){
-            await client.sql`INSERT INTO Todos(Task) VALUES (${req.task})`
+            const res = db.insert(todoTable).values({
+                task:req.task
+            }).returning()
             return NextResponse.json({message: "Data added successfully"})
         }else{
             throw new Error("Task field is required")
