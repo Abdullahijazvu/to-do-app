@@ -1,7 +1,7 @@
 // import { db} from '@vercel/postgres'
 import { QueryResult} from '@vercel/postgres'
 import { NextRequest, NextResponse } from 'next/server'
-import {Todo,newTodo,db,todoTable} from '@/app/lib/drizzle'
+import {Todo,NewTodo,db,todoTable} from '@/app/lib/drizzle'
 import { sql } from '@vercel/postgres'
 
 export async function GET(request: NextRequest){
@@ -21,10 +21,10 @@ export async function POST(request:NextRequest) {
     const req = await request.json()
     try {
         if(req.task){
-            const res = db.insert(todoTable).values({
+            const res = await db.insert(todoTable).values({
                 task:req.task
             }).returning()
-            return NextResponse.json({message: "Data added successfully"})
+            return NextResponse.json({message: "Data added successfully", data: res})
         }else{
             throw new Error("Task field is required")
         }
